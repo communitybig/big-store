@@ -1,0 +1,191 @@
+#!/usr/bin/env bash
+#shellcheck disable=SC2155,SC2034
+#shellcheck source=/dev/null
+
+#  /usr/share/bigbashview/bcc/apps/big-store/info.sh.htm
+#  Description: Big Store installing programs for BigLinux
+#
+#  Created: 2020/01/11
+#  Altered: 2024/07/28
+#
+#  Copyright (c) 2023-2024, Vilmar Catafesta <vcatafesta@gmail.com>
+#                2022-2023, Bruno Gonçalves <www.biglinux.com.br>
+#                2022-2023, Rafael Ruscher <rruscher@gmail.com>
+#  All rights reserved.
+#
+#  Redistribution and use in source and binary forms, with or without
+#  modification, are permitted provided that the following conditions
+#  are met:
+#  1. Redistributions of source code must retain the above copyright
+#     notice, this list of conditions and the following disclaimer.
+#  2. Redistributions in binary form must reproduce the above copyright
+#     notice, this list of conditions and the following disclaimer in the
+#     documentation and/or other materials provided with the distribution.
+#
+#  THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR
+#  IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
+#  OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
+#  IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT,
+#  INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+#  NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+#  DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+#  THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+#  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
+#  THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+APP="${0##*/}"
+_VERSION_="1.0.0-20240728"
+LIBRARY=${LIBRARY:-'/usr/share/bigbashview/bcc/shell'}
+[[ -f "${LIBRARY}/bcclib.sh"  ]] && source "${LIBRARY}/bcclib.sh"
+[[ -f "${LIBRARY}/bstrlib.sh" ]] && source "${LIBRARY}/bstrlib.sh"
+
+function sh_config {
+	#Translation
+	export TEXTDOMAINDIR="/usr/share/locale"
+	export TEXTDOMAIN=big-store
+	declare -gA AInfoMsg=(
+		[Sistema]=$(gettext $"Sistema")
+		[notify-title]=$(gettext $"Big-Store")
+		[notify-msg]=$(gettext $"Aguarde enquanto coletamos informações do sistema. Isso pode levar alguns momentos...")
+		[Instalado_na_particao]=$(gettext $"Instalado na partição:")
+		[Tamanho_da_particao]=$(gettext $"Tamanho da partição:")
+		[Espaco_utilizado]=$(gettext $"Espaço utilizado:")
+		[Espaco_livre]=$(gettext $"Espaço livre:")
+		[Data_SO_instalado]=$(gettext $"Data aproximada que o sistema foi instalado:")
+		[Pacotes_nativos_e_AUR]=$(gettext $"Pacotes nativos e AUR")
+		[Pacotes_flatpak]=$(gettext $"Pacotes Flatpak")
+		[Repositorios_configurados]=$(gettext $"Repositórios configurados:")
+		[Pacotes]=$(gettext $"Pacotes Snap")
+		[Instalados]=$(gettext $"Instalados:")
+		[Disponiveis]=$(gettext $"Disponíveis:")
+	)
+}
+
+function sh_main {
+	notify-send "${AInfoMsg[notify-title]}" "${AInfoMsg[notify-msg]}" --expire-time=2000
+
+	source header.sh.htm
+	#Show category in first page
+	############################
+cat <<-EOF
+	<div id="box_index_category">
+	<div id="box_info_index">
+	<div class="info_box">
+	<div class="category_title_index">
+	${AInfoMsg[Sistema]}
+	</div>
+	<div class="grid-container">
+	<div class="gridLeft">
+	${AInfoMsg[Instalado_na_particao]}
+	</div>
+	<div class="gridRightInfo">
+	$(LC_ALL=C df -h / | grep '/dev/' | awk '{print $1}')
+	</div></div>
+	<div class="grid-container">
+	<div class="gridLeft">
+	${AInfoMsg[Tamanho_da_particao]}
+	</div>
+	<div class="gridRightInfo">
+	$(LC_ALL=C df -h / | grep '/dev/' | awk '{print $2}')
+	</div></div>
+	<div class="grid-container">
+	<div class="gridLeft">
+	${AInfoMsg[Espaco_utilizado]}
+	</div>
+	<div class="gridRightInfo">
+	$(LC_ALL=C df -h / | grep '/dev/' | awk '{print $3}')
+	</div></div>
+	<div class="grid-container">
+	<div class="gridLeft">
+	${AInfoMsg[Espaco_livre]}
+	</div>
+	<div class="gridRightInfo">
+	$(LC_ALL=C df -h / | grep '/dev/' | awk '{print $4}')
+	</div></div>
+	<div class="grid-container">
+	<div class="gridLeft">
+	${AInfoMsg[Data_SO_instalado]}
+	</div>
+	<div class="gridRightInfo">
+	$(sh_SO_installation_date)
+	</div></div></div>
+	<div class="info_box">
+	<div class="category_title_index">
+	${AInfoMsg[Pacotes_nativos_e_AUR]}
+	</div>
+	<div class="grid-container">
+	<div class="gridLeft">
+	${AInfoMsg[Instalados]}
+	</div>
+	<div class="gridRightInfo">
+	$(pacman -Qq | wc -l)
+	</div></div>
+	<div class="grid-container">
+	<div class="gridLeft">
+	${AInfoMsg[Disponiveis]}
+	</div>
+	<div class="gridRightInfo">
+	$(pacman -Sl | wc -l)
+	</div></div>
+	</div>
+	<div class="info_box">
+	<div class="category_title_index">
+	${AInfoMsg[Pacotes_flatpak]}
+	</div>
+	<div class="grid-container">
+	<div class="gridLeft">
+	${AInfoMsg[Instalados]}
+	</div>
+	<div class="gridRightInfo">
+	$(wc -l < <(flatpak list --columns=application))
+	</div></div>
+	<div class="grid-container">
+	<div class="gridLeft">
+	${AInfoMsg[Disponiveis]}
+	</div>
+	<div class="gridRightInfo">
+	$(wc -l < "$flatpak_cache_file")
+	</div></div>
+	<div class="grid-container">
+	<div class="gridLeft">
+	${AInfoMsg[Repositorios_configurados]}
+	</div>
+	<div class="gridRightInfo">
+	$(flatpak remotes | cut -f1)
+	</div></div></div>
+EOF
+
+	if pgrep -f snapd >/dev/null; then
+cat <<-EOF
+		<div class=info_box>
+		<div class=category_title_index>
+		${AInfoMsg[Pacotes]}
+		</div>
+		<div class="grid-container">
+		<div class="gridLeft">
+		${AInfoMsg[Instalados]}
+		</div>
+		<div class="gridRightInfo">
+		$(sh_count_snap_list)
+		</a></div></div>
+		<div class="grid-container">
+		<div class="gridLeft">
+		${AInfoMsg[Disponiveis]}
+		</div><div class="gridRightInfo">
+		$(sh_count_snap_cache_lines)
+		</div></div></div>
+EOF
+	fi
+
+	# Finish him
+cat <<-EOF
+	</div>
+	<script src="./js/script.js"></script>
+	</body>
+	</html>
+EOF
+}
+
+#sh_debug
+sh_config
+sh_main

@@ -1,0 +1,130 @@
+#!/usr/bin/env bash
+
+#!/usr/bin/env bash
+#shellcheck disable=SC2155,SC2034
+#shellcheck source=/dev/null
+
+#  /usr/share/bigbashview/bcc/apps/big-store/biglinux-category
+#  Description: Control Center to help usage of BigLinux
+#
+#  Created: 2022/02/28
+#  Altered: 2024/07/28
+#
+#  Copyright (c) 2023-2024, Vilmar Catafesta <vcatafesta@gmail.com>
+#                2022-2023, Bruno Gonçalves <www.biglinux.com.br>
+#                2022-2023, Rafael Ruscher <rruscher@gmail.com>
+#  All rights reserved.
+#
+#  Redistribution and use in source and binary forms, with or without
+#  modification, are permitted provided that the following conditions
+#  are met:
+#  1. Redistributions of source code must retain the above copyright
+#     notice, this list of conditions and the following disclaimer.
+#  2. Redistributions in binary form must reproduce the above copyright
+#     notice, this list of conditions and the following disclaimer in the
+#     documentation and/or other materials provided with the distribution.
+#
+#  THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR
+#  IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
+#  OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
+#  IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT,
+#  INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+#  NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+#  DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+#  THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+#  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
+#  THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+APP="${0##*/}"
+_VERSION_="1.0.0-20240728"
+LIBRARY=${LIBRARY:-'/usr/share/bigbashview/bcc/shell'}
+[[ -f "${LIBRARY}/bcclib.sh" ]] && source "${LIBRARY}/bcclib.sh"
+[[ -f "${LIBRARY}/bstrlib.sh" ]] && source "${LIBRARY}/bstrlib.sh"
+
+function sh_cleanup {
+	[[ -e "$TMP_FOLDER/category_aur.txt" ]] && rm -f "$TMP_FOLDER/category_aur.txt"
+}
+
+function sh_config {
+	declare -gA CATEGORIES
+	declare -g lcode=$(sh_get_code_language)
+	declare -g Programas_AUR=$"Programas AUR"
+	declare -g Programas_Flatpak=$"Programas Flatpak"
+	declare -g Programas_Nativos=$"Programas Nativos"
+
+	[[ -z "$lcode" ]] && lcode=$(sh_get_code_lang)
+	CATEGORIES["3d"]="blender brlcad freecad gb-studio-bin godot cura-bin librecad meshroom makehuman openscad qcad sweethome3d unity-editor wings3d"
+	CATEGORIES["audioconvert"]="audacity ciano gnac gnome-sound-recorder soundconverter soundkonverter"
+	CATEGORIES["audioplayer"]="audacious clementine deadbeef elisa lollypop qmmp quodlibet rhythmbox spotify strawberry"
+	CATEGORIES["audioeditor"]="ardour audacity cecilia hydrogen kwave lmms mixxx ocenaudio-bin qtractor rosegarden"
+	CATEGORIES["book"]="atril bookworm calibre coolreader evince fbreader foliate gnome-books okular peruse"
+	CATEGORIES["browser"]="brave-browser chromium epiphany falkon falkon-git firefox firefox-i18n-$lcode google-chrome librewolf-bin lynx microsoft-edge-stable-bin opera palemoon vivaldi"
+	CATEGORIES["calendar"]="evolution evolution-ews gnome-calendar gnome-contacts kalarm kaddressbook korganizer morgen-bin osmo pantheon-calendar"
+	CATEGORIES["cloud"]="cloudcross cozy-desktop dropbox megasync nextcloud-client owncloud-client overgrive rclone seafile-client sparkleshare syncthing-gtk"
+	CATEGORIES["deveditor"]="android-studio arduino atom bluefish brackets-bin code codeblocks cudatext-gtk2-bin cudatext-qt5-bin eclipse-java-bin emacs gambas3-ide gedit geany gnome-builder goland intellij-idea-community-edition kate kdevelop kdevelop-php kdevelop-python netbeans okteta phpstorm pycharm-community-edition rider spyder sublime-text-4 vscodium-bin visual-studio-code-bin webstorm xmlmind-xmleditor"
+	CATEGORIES["devbd"]="dbeaver mariadb mongodb-bin mongodb-tools mysql mysql-workbench percona-server pgadmin4 phppgadmin phpmyadmin postgresql questdb"
+	CATEGORIES["devgames"]="blender gb-studio-bin godot makehuman renpy unity-editor unreal-engine"
+	CATEGORIES["devwebserver"]="apache caddy cherokee dnsmasq lighttpd nginx openlitespeed tomcat10"
+	CATEGORIES["download"]="clipgrab flareget gwget jdownloader2 kget steadyflow uget xdman youtubedl-gui"
+	CATEGORIES["dvd"]="acetoneiso2 brasero dvdstyler k3b xfburn"
+	CATEGORIES["fonts"]="font-manager ttf-anonymous-pro ttf-bitstream-vera ttf-caladea ttf-carlito ttf-dejavu ttf-fira-code ttf-fira-mono ttf-fira-sans ttf-font-icons ttf-ibm-plex ttf-lato ttf-linux-libertine ttf-mac-fonts ttf-ms-fonts ttf-ms-win10-auto ttf-roboto ttf-roboto-mono ttf-wps-fonts"
+	CATEGORIES["gamearcade"]="abuse armagetronad astromenace barrage blobby blobwars bomber chromium-bsu cuyo endless-sky extremetuxracer fltk-examples frogatto gnome-nibbles gnome-robots gnujump granatier hedgewars kapman kblackbox kbounce kbreakout kgoldrunner killbots klickety kobodeluxe kolf kolision ksnakeduel lbreakout2 ltis minetest pingus quadrapassel sauerbraten supertux supertuxkart teeworlds uqm warzone2100 warsow xonotic"
+	CATEGORIES["gameboard"]="bovo five-or-more four-in-a-row gnome-chess gnome-mahjongg gnome-sudoku iagno kajongg kfourinline kigo kjumpingcube kmahjongg knights kshisen ksquares ksudoku pychess qgo kreversi swell-foop xboard"
+	CATEGORIES["gamecard"]="aisleriot kpat lskat pysolfc"
+	CATEGORIES["gamemanager"]="gamehub gnome-games heroic-games-launcher-bin itch lutris steam-manjaro steam-native"
+	CATEGORIES["gameemulator"]="citra-bin desmume dgen-sdl dolphin-emu dosbox dosemu epsxe fceux fs-uae fs-uae-launcher fightcade2 flycast-git higan hatari mame mame-tools mednafen mgba-qt m64p mupen64plus nestopia openmsx ppsspp pcsx2 qmc2 rpcs3-bin ryujinx-ldn-bind snes9x-gtk stella vbam-wx vice yabause-qt zsnes"
+	CATEGORIES["gameeducational"]="atomix blinken cantor gbrainy gcompris-qt kanagram katomic khangman kubrick ktuberling kturtle minuet parley solfege step"
+	CATEGORIES["gameother"]="cantor kiriki openbve openrct2 openttd peformous simutrans tali"
+	CATEGORIES["gamepuzzle"]="atomix fillets-ng gnome-2048 gnome-klotsky gnome-mines gnome-taquin gnome-tetravex hitori kblocks kdiamond kmines knetwalk lightsoff palapeli picmi zaz"
+	CATEGORIES["gameretroarch"]="retroarch-biglinux retroarch retroarch-assets-glui retroarch-assets-ozone retroarch-assets-xmb libretro-beetle-pce libretro-beetle-pce-fast libretro-beetle-psx libretro-beetle-psx-hw libretro-beetle-supergrafx libretro-blastem libretro-bsnes libretro-bsnes-hd libretro-bsnes2014 libretro-citra libretro-core-info libretro-desmume libretro-dolphin libretro-duckstation libretro-flycast libretro-gambatte libretro-genesis-plus-gx libretro-kronos libretro-melonds libretro-mesen libretro-mesen-s libretro-mgba libretro-mupen64plus-next libretro-nestopia libretro-overlays libretro-parallel-n64 libretro-picodrive libretro-play libretro-ppsspp libretro-retrodream libretro-sameboy libretro-scummvm libretro-shaders-slang libretro-snes9x libretro-yabause"
+	CATEGORIES["gamerpg"]="freedroidrpg manaplus megaglest naev openmw scummvm springlobby"
+	CATEGORIES["gameutility"]="adriconf gamemode goverlay-bin joyutils mangohud-x11 qt5-gamepad sdl2-gamepad-mapper winetricks"
+	CATEGORIES["gamestrategy"]="0ad freeciv glob2 konquest klines ksirk lincity-ng openra wesnoth widelands"
+	CATEGORIES["imageconvert"]="ciano converseen xnconvert"
+	CATEGORIES["imageeditor"]="drawing digikam fotoxx gimp gravit-designer-bin inkscape kolourpaint krita mypaint pinta rawtherapee scribus sK1"
+	CATEGORIES["imageplayer"]="eog gwenview phototonic ristretto shotwell viewnior gthumb digikam kphotoalbum"
+	CATEGORIES["javajar"]="icedtea-web jre jre10 jre11 jre11-openjdk jre12 jre13 jre14 jre15 jre16 jre17 jre6 jre7 jre7-openjdk jre8 jre8-openjdk jre9 jre-openjdk"
+	CATEGORIES["mail"]="balsa claws-mail evolution geary kmail kube mailspring sylpheed thunderbird thunderbird-i18n-$lcode trojita"
+	CATEGORIES["messages"]="caprine discord element-desktop gajim hexchat icq-bin jami-gnome mattermost mumble murmur pidgin polari quassel-client signal-desktop skypeforlinux-stable-bin slack-desktop teams teamspeak3 telegram-desktop viber wire-desktop zoom"
+	CATEGORIES["network"]="gnome-nettool ipscan mtr-gtk wireshark-qt"
+	CATEGORIES["news"]="akregator gfeeds liferea newsflash pan quiterss rssguard"
+	CATEGORIES["office"]="calligra freeoffice libreoffice-fresh libreoffice-fresh-$lcode libreoffice-still libreoffice-still-$lcode onlyoffice-desktopeditors softmaker-office-2018 softmaker-office-2021 wps-office wps-office-mui-$lcode"
+	CATEGORIES["pdf"]="diffpdf gscan2pdf masterpdfeditor masterpdfeditor-free mupdf pdfarranger pdfmixtool pdfmod pdfslicer pdftricks"
+	CATEGORIES["remote"]="anydesk-bin chrome-remote-desktop filezilla krdc krfb putty remmina rustdesk-bin teamviewer tigervnc tmate vinagre"
+	CATEGORIES["screenshot"]="flameshot gnome-screenshot kazam pantheon-screenshot screencloud spectacle ksnip"
+	CATEGORIES["storage"]="baobab balena-etcher-appimage bleachbit filelight gnome-dist-utility gnome-multi-writer gparted kdiskmark mintstick gsmartcontrol partitionmanager"
+	CATEGORIES["torrent"]="amule deluge-gtk fragments frostwire ktorrent qbittorrent tixati torrential transmission-qt"
+	CATEGORIES["virtualization"]="gnome-boxes qemu qemu-full qemu-guest-agent virt-manager virtualbox virtualbox-guest-utils"
+	CATEGORIES["videoeditor"]="avidemux-qt blender ciano davinci-resolve davinci-resolve-studio flowblade handbrake kdenlive lightworks losslesscut-bin mystiq openshot pitivi qencoder shotcut vidcutter"
+	CATEGORIES["videoplayer"]="celluloid kodi mpv parole smplayer totem vlc vlc-luajit"
+	CATEGORIES["videostream"]="clipgrab freetube-bin hypnotix kodi plex-media-player plex-media-server minitube youtube-viewer youtubedl-gui"
+}
+
+function sh_main {
+	local category="$1"
+	local appstream_packages
+	local flatpak_packages
+	local aexceptions=(network news book devwebserver gameretroarch)
+
+	sh_cleanup
+	[[ -n "$category" ]] && {
+		appstream_packages="${CATEGORIES[$category]}"
+		aur_packages="${CATEGORIES[$category]}"
+		flatpak_packages="${CATEGORIES[$category]}"
+		snap_packages="${CATEGORIES[$category]}"
+
+		[[ -n "$appstream_packages" ]] && appstream_search_category=1 APPSTREAM_CATEGORY "$appstream_packages"
+		[[ -n "$aur_packages"       ]] && aur_search_category=1       AUR_CATEGORY "$aur_packages"
+		[[ -n "$flatpak_packages"   ]] && flatpak_search_category=1   FLATPAK_CATEGORY "$flatpak_packages"
+		[[ -n "$snap_packages"      ]] && snap_search_category=1      SNAP_CATEGORY "$snap_packages"
+
+#		case "$category" in
+#		network | news | book | devwebserver | gameretroarch) ;;
+#		*) AUR_CATEGORY ;;
+#		esac
+	}
+}
+
+#sh_debug
+sh_config
+sh_main "$category"

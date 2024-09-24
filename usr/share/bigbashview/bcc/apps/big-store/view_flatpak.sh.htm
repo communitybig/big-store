@@ -1,0 +1,129 @@
+#!/usr/bin/env bash
+#shellcheck disable=SC2155,SC2034
+#shellcheck source=/dev/null
+
+#	 /usr/share/bigbashview/bcc/apps/big-store/view_flatpak.sh.htm
+#  Description: Big Store installing programs for BigLinux
+#
+#  Created: 2022/11/01
+#  Altered: 2024/08/01
+#
+#  Copyright (c) 2023-2024, Vilmar Catafesta <vcatafesta@gmail.com>
+#                2022-2023, Bruno Gonçalves <www.biglinux.com.br>
+#                2022-2023, Rafael Ruscher <rruscher@gmail.com>
+#  All rights reserved.
+#
+#  Redistribution and use in source and binary forms, with or without
+#  modification, are permitted provided that the following conditions
+#  are met:
+#  1. Redistributions of source code must retain the above copyright
+#     notice, this list of conditions and the following disclaimer.
+#  2. Redistributions in binary form must reproduce the above copyright
+#     notice, this list of conditions and the following disclaimer in the
+#     documentation and/or other materials provided with the distribution.
+#
+#  THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR
+#  IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
+#  OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
+#  IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT,
+#  INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+#  NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+#  DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+#  THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+#  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
+#  THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+APP="${0##*/}"
+_VERSION_="1.0.0-20240801"
+export LIBRARY=${LIBRARY:-'/usr/share/bigbashview/bcc/shell'}
+[[ -f "${LIBRARY}/bcclib.sh"  ]] && source "${LIBRARY}/bcclib.sh"
+[[ -f "${LIBRARY}/bstrlib.sh" ]] && source "${LIBRARY}/bstrlib.sh"
+
+function sh_config() {
+	export REPOSITORY="$(echo "${PKG_FLATPAK[PKG_ID]}" | cut -f1 -d"/")"
+	export PACKAGE_ID="$(echo "${PKG_FLATPAK[PKG_ID]}" | cut -f2-90 -d"/")"
+}
+
+function sh_main_view_flatpak_sh_htm() {
+	[[ -z "$PACKAGE_ID" ]] && PACKAGE_ID="$pkg_name" || PACKAGE_ID="${FLATPAK[PKG_ID]}"
+
+	if [[ "$pkg_install" = "y" ]]; then
+		ACTION="install_flatpak"
+#		REPOSITORY="$REPOSITORY"
+#		PACKAGE_ID="$PACKAGE_ID"
+		sh_run_action "$ACTION" "$WINDOW_ID" "$PACKAGE_NAME" "$PACKAGE_ID" "$REPOSITORY" "$DRIVER"
+	fi
+
+	if [[ "$pkg_remove" = "y" ]]; then
+		ACTION="remove_flatpak"
+#		REPOSITORY="$REPOSITORY"
+#		PACKAGE_ID="$PACKAGE_ID"
+		sh_run_action "$ACTION" "$WINDOW_ID" "$PACKAGE_NAME" "$PACKAGE_ID" "$REPOSITORY" "$DRIVER"
+	fi
+
+	cat <<-EOF
+		<div id="box_progress_flatpak_cancel">
+			<button class="btn btnSpace waves-effect waves-light grey darken-2" type="submit" name="action" onclick="disableButtonFlatpakInstall();_run('killall flatpak')">
+			$Button_Cancelar
+			</button>
+		</div>
+	EOF
+
+	source header.sh.htm "sh_header_sh_htm_main"
+
+	# Remove verification-fault file, if python don't create this file, is because python fault
+	[[ -e $HOME_FOLDER/flatpak-verification-fault ]] && rm -f $HOME_FOLDER/flatpak-verification-fault
+
+	python view_flatpak_pamac.py "$pkg_name" "$pkg_summary" > "$TMP_FOLDER/flatpak_pamac_temp.txt"
+
+	if [[ ! -e "$HOME_FOLDER/flatpak-verification-fault" ]]; then
+		grep -ve "^bef flathub" -ve "^aft flathub" "$TMP_FOLDER/flatpak_pamac_temp.txt"
+	else
+		source view_flatpak.sh "$pkg_name"
+	fi
+
+	cat <<-EOF
+		<script>runAvatarFlatpak();</script>
+		<div id="modal1" class="modal modal-fixed-footer">
+		<div class="modal-content">
+		<div id="files_in_package">
+		<div id="preloader-align">
+		<div class="preloader-wrapper big active">
+		<div class="spinner-layer spinner-blue-only">
+		<div class="circle-clipper left">
+		<div class="circle">
+		</div>
+		</div>
+		<div class="gap-patch">
+		<div class="circle">
+		</div>
+		</div>
+		<div class="circle-clipper right">
+		<div class="circle">
+		</div>
+		</div>
+		</div>
+		</div>
+		</div>
+		</div>
+		</div>
+		<div class="modal-footer">
+		<a href="#!" class="modal-close btn-flat">
+		$Button_Fechar
+		</a>
+		</div>
+		</div>
+		<script>\$(document).ready(function(){\$('.modal').modal();}); </script>
+		<div class="logo">
+		<img id="btn-big" src="icons/logo.png" class="logo-biglinux" onclick="biglinux();">
+		</div>
+		</div>
+		<script src="js/script.js"></script>
+		</body>
+		</html>
+	EOF
+}
+
+#sh_debug
+sh_config
+sh_main_view_flatpak_sh_htm "$@"
