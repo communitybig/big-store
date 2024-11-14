@@ -2,7 +2,6 @@
 
 pkgname=big-store
 pkgdesc="A friendly interface using bigbashview and that uses a large part of pamac resources to offer users a practical and simple interface"
-# Uncomment and edit the following lines as needed
 depends=('bc'
 	'bigbashview'
 	'bigcontrolcenter-base'
@@ -34,7 +33,7 @@ optdepends=('libpamac-snap-plugin'
 #conflicts=('')
 #provides=('')
 #replaces=('')
-pkgver=$(date +%y.%m.%d)
+pkgver=$(date +%Y%m%d)
 pkgrel=$(date +%H%M)
 arch=('any')
 license=('MIT')
