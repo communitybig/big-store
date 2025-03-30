@@ -16,4 +16,3 @@ MimeType=text/html;text/xml;application/xhtml_xml;
 Categories=Settings;Biglinux;
 Exec=big-store
 Icon=big-store
-StartupWMClass=BigBashView

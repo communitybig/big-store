@@ -62,8 +62,6 @@ skipping {
 
 /^Name/ {
     title = gensub(/^Name +: /,"",1)
-    title = gensub(/[\(\)&]/, "", "g", title)
-
     not_installed = system("pacman -Q " title " 2> /dev/null 1> /dev/null")
     if ( not_installed ) {
         idaur = "AurP2"
