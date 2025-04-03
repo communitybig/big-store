@@ -1,86 +1,68 @@
-# Maintainer: Vilmar Catafesta <vcatafesta@gmail.com>
+# Maintainer: Bruno Goncalves <bigbruno@gmail.com>
+# Altered: dom 30 mar 2025 10:28:38 -04
 
 pkgname=big-store
 pkgdesc="A friendly interface using bigbashview and that uses a large part of pamac resources to offer users a practical and simple interface"
-depends=('bc'
-	'bigbashview'
-	'bigcontrolcenter-base'
-	'bigsudo'
-	'curl'
-	'force-upgrade'
-	'jq'
-	'pamac-gtk'
-	'parallel'
-	'python-gobject'
-	'rxvt-unicode'
-	'flatpak'
-	'ttf-comfortaa'
-	'ttf-ubuntu-font-family'
-	'xorg-xwininfo'
-	'xorg-xwininfo'
-	'xorg-xrandr'
-	'wmctrl'
-	'yay'
-	'sqlite'
-	'translate-shell'
-	'xsetprop'
-	'xtermset')
-optdepends=('libpamac-snap-plugin'
-	'libpamac-flatpak-plugin'
-	'pamac-snap-plugin'
-	'pamac-flatpak-plugin')
-#makedepends=('')
-#conflicts=('')
-#provides=('')
-#replaces=('')
 pkgver=$(date +%Y%m%d)
 pkgrel=$(date +%H%M)
 arch=('any')
-license=('MIT')
-url="https://github.com/communitybig/${pkgname}"
+license=('GPL')
+url="https://github.com/communitybig/$pkgname"
 source=("git+${url}.git")
-md5sums=('SKIP')
+md5sums=(SKIP)
+depends=()
+optdepends=(
+	bc
+	bigcontrolcenter-base
+	bigbashview
+	bigsudo
+	curl
+	force-upgrade
+	gawk
+	grep
+	jq
+	pamac-gtk
+	paru
+	parallel
+	python-gobject
+	rxvt-unicode
+	sed
+	flatpak
+	ttf-comfortaa
+	ttf-ubuntu-font-family
+	xorg-xwininfo
+	xorg-xwininfo
+	xorg-xrandr
+	wmctrl
+	yay
+	sqlite
+	translate-shell
+	xsetprop
+	xtermset
+	libpamac-snap-plugin
+	libpamac-flatpak-plugin
+	pamac-snap-plugin
+	pamac-flatpak-plugin
+)
 
-# Automatically detect and use the correct install file
 if [ -e "${pkgname}.install" ]; then
 	install=${pkgname}.install
 elif [ -e "pkgbuild.install" ]; then
 	install=pkgbuild.install
 fi
 
-prepare() {
-	cd "${srcdir}/${pkgname}"
-	# Add any preparation steps here, if needed
-	# For example: patch -p1 < "${srcdir}/patch-file.patch"
-}
-
-build() {
-	cd "${srcdir}/${pkgname}"
-	# Add build steps here, if needed
-	# For example: make
-}
-
-check() {
-	cd "${srcdir}/${pkgname}"
-	# Add check/test steps here, if needed
-	# For example: make check
-}
-
 package() {
 	cd "${srcdir}/${pkgname}"
 
-	# Determine the correct source directory
-	if [ -d "${pkgname}" ]; then
-		srcdir="${srcdir}/${pkgname}/${pkgname}"
-	else
-		srcdir="${srcdir}/${pkgname}"
-	fi
+	# mkdir -p "${pkgdir}/usr/share/${pkgname}"
+	install -dm755 "${pkgdir}/usr/share/${pkgname}"
+	printf "%s\n" "${optdepends[@]}" >"${pkgdir}/usr/share/${pkgname}/optdepends"
 
-	# Install files
+	# Copiar a estrutura de /etc, /usr e /opt para /usr/share/${pkgname}
 	local dirs=("usr" "etc" "opt")
 	for dir in "${dirs[@]}"; do
-		if [ -d "${srcdir}/${dir}" ]; then
-			cp -a "${srcdir}/${dir}" "${pkgdir}/"
+		if [ -d "${srcdir}/${pkgname}/${dir}" ]; then
+			cp -a "${srcdir}/${pkgname}/${dir}" "${pkgdir}/usr/share/${pkgname}/"
 		fi
 	done
 
@@ -95,6 +77,6 @@ package() {
 	fi
 
 	# Add link to bin path
-	mkdir -p ${pkgdir}/usr/bin
-	ln -s /usr/share/bigbashview/bcc/apps/big-store/big-store-start.sh ${pkgdir}/usr/bin/big-store
+	mkdir "${pkgdir}/usr/bin"
+	ln -s "/usr/share/bigbashview/bcc/apps/big-store/big-store-start.sh" "${pkgdir}/usr/bin/big-store"
 }
